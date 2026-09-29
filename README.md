@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sunshine Cleaning Services Limited
 
-## Getting Started
+Modern, premium, conversion-focused website for **Sunshine Cleaning Services Limited** — London's trusted professional cleaning specialists.
 
-First, run the development server:
+## 🌟 Business Information
+
+- **Company Name**: Sunshine Cleaning Services Limited
+- **Founder**: Pankaj Yadav
+- **Mobile**: 07542834640
+- **Address**: 1 A Speranza Street, London, Greater London SE18 1NX
+- **Service Area**: Greater London & surrounding boroughs
+
+---
+
+## 🚀 Features
+
+- **Dynamic Interactive UI**: Built with Next.js 16 App Router and Turbopack.
+- **Micro-Animations & Smooth Motion**: Powered by Framer Motion and GSAP.
+- **Interactive Before / After Comparison**: Draggable comparison slider.
+- **5-Step Smart Booking Wizard**: Dynamic property fields, validation via Zod + React Hook Form.
+- **Full Static Page Generation (SSG)**: Fast prerendered pages for all 6 core services:
+  - Deep Cleaning
+  - End of Tenancy Cleaning
+  - Regular Domestic Cleaning
+  - Commercial & Office Cleaning
+  - After Builders Cleaning
+  - Carpet & Upholstery Cleaning
+- **SEO & Social Metadata**: Dynamic `sitemap.xml`, `robots.txt`, and OpenGraph metadata.
+- **Database Ready**: Prisma schema prepared for PostgreSQL.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Language**: TypeScript
+- **Styling**: Vanilla CSS Design Tokens (Warm Sunshine Palette)
+- **Animations**: Framer Motion & GSAP
+- **Forms & Validation**: React Hook Form + Zod
+- **Icons**: Lucide React
+- **ORM**: Prisma Client
+
+---
+
+## 💻 Getting Started Locally
 
 ```bash
+# 1. Install dependencies
+npm install
+
+# 2. Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# 3. Production build check
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open [http://localhost:3000](http://localhost:3000) to view the site locally.
