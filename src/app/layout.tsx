@@ -3,6 +3,8 @@ import './globals.css';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { FloatingCTA } from '@/components/layout/FloatingCTA';
+import { MouseLighting } from '@/components/layout/MouseLighting';
+import { CustomCursor } from '@/components/layout/CustomCursor';
 
 export const metadata: Metadata = {
   title: {
@@ -50,6 +52,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <CustomCursor />
+        <MouseLighting />
         <Navbar />
         <main>{children}</main>
         <Footer />

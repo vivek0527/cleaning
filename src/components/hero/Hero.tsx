@@ -1,271 +1,329 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
-import { motion, useMotionValue, useTransform } from 'framer-motion';
-import { ArrowRight, Sparkles, MapPin } from 'lucide-react';
+import { useRef } from 'react';
+import Image from 'next/image';
+import { motion, useScroll, useTransform } from 'framer-motion';
+import { Sparkles, MapPin, ChevronDown } from 'lucide-react';
+import { MagneticButton } from '@/components/ui/MagneticButton';
+import { photography } from '@/data/photography';
 
 export function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const sunriseProgress = useMotionValue(0);
-  const bgBrightness = useTransform(sunriseProgress, [0, 1], [0.92, 1]);
 
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
+  // Parallax Scroll Animation
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end start'],
+  });
 
-  useEffect(() => {
-    // Sunrise animation on load
-    const timeout = setTimeout(() => {
-      sunriseProgress.set(1);
-    }, 200);
-    return () => clearTimeout(timeout);
-  }, [sunriseProgress]);
+  const bgY = useTransform(scrollYProgress, [0, 1], ['0%', '24%']);
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.12]);
+  const textY = useTransform(scrollYProgress, [0, 1], ['0%', '-18%']);
+  const textOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
+  const overlayOpacity = useTransform(scrollYProgress, [0, 1], [0.65, 0.92]);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (prefersReducedMotion) return;
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setMousePos({
-      x: (e.clientX - rect.left) / rect.width,
-      y: (e.clientY - rect.top) / rect.height,
-    });
-  };
+  const words = ['BRING', 'THE', 'SUNSHINE', 'HOME.'];
 
   return (
     <section
       ref={containerRef}
-      onMouseMove={handleMouseMove}
       style={{
         position: 'relative',
-        minHeight: '100vh',
+        width: '100%',
+        minHeight: '100svh',
+        height: '100svh',
         display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
         alignItems: 'center',
         overflow: 'hidden',
-        paddingTop: '2rem',
-        paddingBottom: '4rem',
+        color: '#FFFFFF',
+        padding: '0 1.5rem',
       }}
     >
-      {/* Background gradient that transitions from darker to bright */}
+      {/* 1. Full-screen Photographic Background with initial load scale & parallax */}
       <motion.div
         style={{
           position: 'absolute',
           inset: 0,
+          y: bgY,
+          scale: bgScale,
+          zIndex: 1,
+        }}
+      >
+        <motion.div
+          initial={{ scale: 1.12, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
+          style={{ position: 'relative', width: '100%', height: '100%' }}
+        >
+          <Image
+            src={photography.hero}
+            alt="Pristine, sun-drenched London luxury penthouse"
+            fill
+            priority
+            quality={90}
+            sizes="100vw"
+            style={{
+              objectFit: 'cover',
+              objectPosition: 'center 40%',
+            }}
+          />
+        </motion.div>
+      </motion.div>
+
+      {/* 2. Dark Vignette Cinematic Gradient */}
+      <motion.div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 2,
           background: `
-            radial-gradient(ellipse 120% 100% at 70% 110%, rgba(232,185,49,0.08) 0%, transparent 60%),
-            linear-gradient(180deg, #F5F0E6 0%, #FDFBF7 40%, #FDFBF7 100%)
+            radial-gradient(ellipse 90% 80% at 50% 40%, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.85) 100%),
+            linear-gradient(180deg, rgba(10,10,10,0.5) 0%, rgba(10,10,10,0.3) 40%, rgba(10,10,10,0.92) 100%)
           `,
-          filter: useTransform(bgBrightness, (v) => `brightness(${v})`),
+          opacity: overlayOpacity,
         }}
       />
 
-      {/* Sun Ray - follows cursor on desktop */}
-      {!prefersReducedMotion && (
-        <div
-          className="hide-mobile"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            pointerEvents: 'none',
-            background: `radial-gradient(circle at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(232,185,49,0.1) 0%, transparent 35%)`,
-            transition: 'background 0.6s ease-out',
-          }}
-        />
-      )}
-
-      {/* Rising sunlight element */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8, y: 80 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 1.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      {/* 3. Subtle Warm Sunlight Glow */}
+      <div
+        aria-hidden="true"
         style={{
           position: 'absolute',
+          top: '-10%',
           right: '-5%',
-          bottom: '-20%',
-          width: '70vw',
-          height: '70vw',
+          width: '65vw',
+          height: '65vw',
           maxWidth: '900px',
           maxHeight: '900px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(232,185,49,0.06) 0%, rgba(232,185,49,0.02) 40%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(232,185,49,0.24) 0%, rgba(232,185,49,0.06) 50%, transparent 75%)',
+          filter: 'blur(40px)',
           pointerEvents: 'none',
+          zIndex: 3,
         }}
       />
 
-      {/* Content */}
-      <div className="container" style={{ position: 'relative', zIndex: 2 }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr',
-          gap: '3rem',
+      {/* 4. Hero Content Layer */}
+      <motion.div
+        style={{
+          position: 'relative',
+          zIndex: 4,
+          width: '100%',
+          maxWidth: '1240px',
+          margin: '0 auto',
+          display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          maxWidth: '760px',
-        }}>
-          {/* Text */}
-          <div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+          textAlign: 'center',
+          y: textY,
+          opacity: textOpacity,
+          paddingTop: '3rem',
+        }}
+      >
+        {/* Eyebrow badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -20, filter: 'blur(8px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          style={{ marginBottom: '1.75rem' }}
+        >
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.625rem',
+              padding: '0.45rem 1.15rem',
+              borderRadius: '9999px',
+              background: 'rgba(255, 255, 255, 0.08)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              border: '1px solid rgba(255, 255, 255, 0.16)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+            }}
+          >
+            <Sparkles size={14} style={{ color: 'var(--accent)' }} />
+            <span
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                color: 'rgba(255, 255, 255, 0.95)',
+                fontFamily: 'var(--font-display)',
+              }}
             >
-              <span className="section-label" style={{ marginBottom: '1.5rem' }}>
-                Professional Cleaning · London
-              </span>
-            </motion.div>
+              London's Premier Cleaning Specialists
+            </span>
+            <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--accent)' }} />
+            <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)' }}>Pankaj Yadav</span>
+          </div>
+        </motion.div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              style={{ marginBottom: '1.5rem' }}
-            >
-              Bring the{' '}
-              <span style={{
-                color: 'var(--accent-hover)',
-                position: 'relative',
-                display: 'inline-block',
-              }}>
-                Sunshine
-                <motion.svg
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 1.2, delay: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                  viewBox="0 0 200 12"
+        {/* 5. Editorial Massive Headline with Line-by-Line Clip-Path Reveal */}
+        <h1
+          style={{
+            margin: 0,
+            padding: 0,
+            fontSize: 'clamp(3.5rem, 8.5vw, 9.25rem)',
+            fontWeight: 800,
+            fontFamily: 'var(--font-display)',
+            lineHeight: 0.94,
+            letterSpacing: '-0.04em',
+            textTransform: 'uppercase',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.15em',
+            marginBottom: '2rem',
+          }}
+        >
+          {words.map((word, index) => {
+            const isSunshine = word === 'SUNSHINE';
+            return (
+              <div
+                key={word}
+                style={{
+                  overflow: 'hidden',
+                  padding: '0.05em 0.2em',
+                }}
+              >
+                <motion.span
+                  initial={{ y: '110%', opacity: 0, rotateX: 35 }}
+                  animate={{ y: '0%', opacity: 1, rotateX: 0 }}
+                  transition={{
+                    duration: 1.1,
+                    delay: 0.35 + index * 0.14,
+                    ease: [0.16, 1, 0.3, 1],
+                  }}
                   style={{
-                    position: 'absolute',
-                    bottom: -4,
-                    left: 0,
-                    width: '100%',
-                    height: '12px',
-                    overflow: 'visible',
+                    display: 'inline-block',
+                    background: isSunshine
+                      ? 'linear-gradient(135deg, #FFE885 0%, #E8B931 50%, #D4A520 100%)'
+                      : 'linear-gradient(180deg, #FFFFFF 30%, rgba(255,255,255,0.78) 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    textShadow: isSunshine
+                      ? '0 0 45px rgba(232, 185, 49, 0.45)'
+                      : '0 4px 30px rgba(0,0,0,0.5)',
+                    position: 'relative',
                   }}
                 >
-                  <motion.path
-                    d="M 2 8 Q 50 2, 100 6 T 198 5"
-                    fill="none"
-                    stroke="var(--accent)"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1.2, delay: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                  />
-                </motion.svg>
-              </span>{' '}
-              Home.
-            </motion.h1>
+                  {word}
+                </motion.span>
+              </div>
+            );
+          })}
+        </h1>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.7 }}
-              style={{
-                fontSize: 'clamp(1.0625rem, 1.5vw, 1.25rem)',
-                lineHeight: 1.7,
-                maxWidth: '560px',
-                marginBottom: '2.5rem',
-              }}
-            >
-              Professional cleaning services for homes and businesses across London.
-              Thoughtful cleaning, beautiful results and service you can rely on.
-            </motion.p>
+        {/* Supporting Editorial Paragraph */}
+        <motion.p
+          initial={{ opacity: 0, y: 24, filter: 'blur(6px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 0.9, delay: 0.95, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            fontSize: 'clamp(1.0625rem, 1.8vw, 1.35rem)',
+            lineHeight: 1.6,
+            maxWidth: '620px',
+            color: 'rgba(255, 255, 255, 0.86)',
+            marginBottom: '2.5rem',
+            textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+            fontWeight: 400,
+          }}
+        >
+          Meticulous residential, tenancy, and commercial care across Greater London.
+          Transforming living spaces with sunlight clarity, trusted craftsmanship, and unwavering detail.
+        </motion.p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.9 }}
-              style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}
-            >
-              <Link href="/booking" className="btn btn-primary btn-lg">
-                Book a Cleaning
-                <ArrowRight size={18} />
-              </Link>
-              <Link href="/services" className="btn btn-secondary btn-lg">
-                View Our Services
-              </Link>
-            </motion.div>
-          </div>
-        </div>
+        {/* Magnetic CTAs */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, delay: 1.15, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            display: 'flex',
+            gap: '1.25rem',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+          }}
+        >
+          <MagneticButton href="/booking" variant="primary" size="lg" dataCursor="BOOK">
+            Book a Cleaning
+          </MagneticButton>
 
-        {/* Floating Cards */}
-        <div className="hide-mobile">
-          <motion.div
-            initial={{ opacity: 0, y: 30, x: 20 }}
-            animate={{ opacity: 1, y: 0, x: 0 }}
-            transition={{ duration: 0.8, delay: 1.3, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              position: 'absolute',
-              right: '8%',
-              top: '28%',
-              background: 'var(--card)',
-              borderRadius: 'var(--radius-md)',
-              padding: '1.25rem 1.75rem',
-              boxShadow: 'var(--shadow-lg)',
-              border: '1px solid var(--card-border)',
-              maxWidth: '220px',
-            }}
-          >
-            <Sparkles size={20} style={{ color: 'var(--accent)', marginBottom: '0.5rem' }} />
-            <p style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--foreground)', marginBottom: '0.125rem' }}>Fresh spaces.</p>
-            <p style={{ fontWeight: 500, fontSize: '0.875rem', color: 'var(--foreground-muted)' }}>Happy homes.</p>
-          </motion.div>
+          <MagneticButton href="/services" variant="glass" size="lg" dataCursor="VIEW">
+            Explore Services
+          </MagneticButton>
+        </motion.div>
+      </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30, x: 20 }}
-            animate={{ opacity: 1, y: 0, x: 0 }}
-            transition={{ duration: 0.8, delay: 1.6, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              position: 'absolute',
-              right: '15%',
-              bottom: '18%',
-              background: 'var(--primary)',
-              color: 'var(--primary-foreground)',
-              borderRadius: 'var(--radius-md)',
-              padding: '1.25rem 1.75rem',
-              boxShadow: 'var(--shadow-lg)',
-              maxWidth: '240px',
-            }}
-          >
-            <MapPin size={16} style={{ color: 'var(--accent)', marginBottom: '0.5rem' }} />
-            <p style={{ fontWeight: 700, fontSize: '0.9375rem' }}>Professional Cleaning</p>
-            <p style={{ fontSize: '0.8125rem', opacity: 0.7 }}>London</p>
-          </motion.div>
-        </div>
-      </div>
+      {/* Floating Ambient Info Pill (Desktop Only) */}
+      <motion.div
+        initial={{ opacity: 0, x: -30 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 1, delay: 1.4, ease: [0.16, 1, 0.3, 1] }}
+        className="hide-mobile"
+        style={{
+          position: 'absolute',
+          bottom: '2.5rem',
+          left: '3rem',
+          zIndex: 4,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.875rem',
+          padding: '0.625rem 1.25rem',
+          borderRadius: '9999px',
+          background: 'rgba(18, 18, 18, 0.45)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          color: 'rgba(255, 255, 255, 0.8)',
+          fontSize: '0.8125rem',
+        }}
+      >
+        <MapPin size={15} style={{ color: 'var(--accent)' }} />
+        <span>1 A Speranza Street, London SE18 1NX</span>
+      </motion.div>
 
-      {/* Subtle particles / light rays */}
-      {!prefersReducedMotion && (
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-          {[...Array(5)].map((_, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0.3, 0] }}
-              transition={{
-                duration: 4 + i,
-                delay: 2 + i * 0.8,
-                repeat: Infinity,
-                repeatType: 'loop',
-              }}
-              style={{
-                position: 'absolute',
-                right: `${10 + i * 12}%`,
-                top: `${20 + i * 8}%`,
-                width: 4,
-                height: 4,
-                borderRadius: '50%',
-                background: 'var(--accent)',
-              }}
-            />
-          ))}
-        </div>
-      )}
+      {/* 6. Animated Scroll Indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.6, duration: 0.8 }}
+        style={{
+          position: 'absolute',
+          bottom: '2rem',
+          zIndex: 4,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '0.35rem',
+          cursor: 'pointer',
+        }}
+        onClick={() => {
+          window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+        }}
+      >
+        <span
+          style={{
+            fontSize: '0.6875rem',
+            letterSpacing: '0.25em',
+            textTransform: 'uppercase',
+            color: 'rgba(255, 255, 255, 0.65)',
+            fontFamily: 'var(--font-display)',
+            fontWeight: 700,
+          }}
+        >
+          SCROLL
+        </span>
+        <motion.div
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <ChevronDown size={18} color="rgba(255, 255, 255, 0.75)" />
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
